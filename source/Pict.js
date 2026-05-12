@@ -30,6 +30,7 @@ const libFable = require('fable');
 const libPackage = require('../package.json');
 const libProviderFilterManager = require('./providers/Provider-Filter-Manager.js');
 const libProviderDataBroker = require('./providers/Provider-DataBroker.js');
+const libProviderIcon = require('./providers/Provider-Icon.js');
 
 const PictTemplateProvider = require('./Pict-Template-Provider.js');
 const PictTemplateAudit = require('./Pict-Template-Audit.js');
@@ -185,6 +186,26 @@ class Pict extends libFable {
 
 		this.addProvider('FilterManager', {}, libProviderFilterManager);
 		this.addProvider('DataBroker', {}, libProviderDataBroker);
+		this.addProvider('Icon', {}, libProviderIcon);
+	}
+
+	/**
+	 * Convenience accessor for the built-in icon registry — equivalent to
+	 * `pict.providers.Icon.get(name, opts)`.  Always returns a string
+	 * (never throws, never undefined); a missing icon emits a visible
+	 * question-mark glyph so the gap is obvious in the UI.
+	 *
+	 * @param {string} pName     PascalCase icon name, or an alias.
+	 * @param {object} [pOpts]   { variant, size, class, ariaLabel }
+	 * @returns {string}
+	 */
+	icon(pName, pOpts)
+	{
+		if (!this.providers || !this.providers.Icon)
+		{
+			return '';
+		}
+		return this.providers.Icon.get(pName, pOpts);
 	}
 
 	/**
@@ -532,6 +553,15 @@ class Pict extends libFable {
 
 			// Know the in-browser reference for Pict when appropriate
 			this.addTemplate(require(`./templates/Pict-Template-Self.js`));
+
+			// Built-in icon glyph by PascalCase name.
+			//   {~Icon:Home~}              default variant
+			//   {~Icon:Folder:Filled~}     explicit variant
+			//   {~I:Spreadsheet~}          short alias
+			//   {~I:File:Filled~}          short + variant
+			// Backed by pict.providers.Icon — host modules register
+			// additional glyphs via pict.providers.Icon.registerSet().
+			this.addTemplate(require(`./templates/Pict-Template-Icon.js`));
 
 			// Look up an entity template expression
 			// {~Entity:Book^AppData.Some.Address.IDBook^Render-Book-Template~}
