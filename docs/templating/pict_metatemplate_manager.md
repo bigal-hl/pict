@@ -76,6 +76,45 @@ const result = _Pict.parseTemplateByHash('Greeting');
 // result = "Hello John!"
 ```
 
+### Try it in the playground
+
+The block below runs against a fresh `pict` instance and writes the rendered
+HTML straight into the playground's DOM sandbox. Click ▶ to render
+**Hello, World!** into the right-hand pane.
+
+```javascript
+const libPict = require('pict');
+const pict = new libPict({ Product: 'TemplateDemo' });
+
+pict.TemplateProvider.addTemplate('Greeting',
+    '<h2 style="margin:0">Hello, {~D:Record.name~}!</h2>');
+
+const html = pict.parseTemplateByHash('Greeting', { name: 'World' });
+sandbox.innerHTML = html;
+
+console.log('Rendered HTML:', html);
+```
+
+And here's the same pattern using `ContentAssignment` — pict's canonical
+DOM-write API — to place the rendered fragment into a target you create
+inside the sandbox:
+
+```javascript
+const libPict = require('pict');
+const pict = new libPict({ Product: 'ContentAssignmentDemo' });
+
+// Drop a target element into the sandbox first.
+sandbox.innerHTML = '<div id="DemoTarget" style="border:1px dashed #aaa; padding:8px;"></div>';
+
+pict.TemplateProvider.addTemplate('Status',
+    '<p style="margin:0">{~D:Record.label~} — <strong>{~D:Record.value~}</strong></p>');
+
+const html = pict.parseTemplateByHash('Status', { label: 'Build', value: 'green' });
+pict.ContentAssignment.assignContent('#DemoTarget', html);
+
+console.log('Wrote to #DemoTarget via ContentAssignment.');
+```
+
 ### Async Parsing
 
 For templates that require async operations:

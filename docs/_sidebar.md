@@ -3,6 +3,7 @@
   - [Introduction](README.md)
   - [Quickstart](pict_quickstart.md)
   - [Key Concepts](pict_keyconcepts.md)
+  - [Code Playground](playground.md)
 
 - Core Concepts
 
