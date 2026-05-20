@@ -573,6 +573,15 @@ class Pict extends libFable {
 			// {~T:Template:AddressOfData~}
 			this.addTemplate(require(`./templates/Pict-Template-Template.js`));
 			this.addTemplate(require(`./templates/Pict-Template-TemplateByDataAddress.js`));
+			// Inline Template Expression -- parse the contents as a template at runtime
+			// {<TEMPLATED CONTENT HERE, {~D:AppData.SomeValue~}.>}
+			this.addTemplate(require(`./templates/Pict-Template-InlineTemplate.js`));
+			// Function Expression -- call a function by address with addressed arguments
+			// {~Function:Pict.providers.X.makeThing:Record.X:Record.Y~}  /  {~F:...~}
+			this.addTemplate(require(`./templates/Pict-Template-Function.js`));
+			// Addressed Template Expression -- resolve an address to a template string and render it
+			// {[AppData.MyTemplate]}
+			this.addTemplate(require(`./templates/Pict-Template-AddressedTemplate.js`));
 			// {~SBR:AppData.Equation:AppData.HomeworkRectangleSize:AppData.HomeworkManifest~}
 			this.addTemplate(require(`./templates/Pict-Template-SolveByReference.js`));
 			this.addTemplate(require(`./templates/Pict-Template-Solve.js`));

@@ -2,6 +2,8 @@
 
 Pict uses "jellyfish templates" - template expressions wrapped in `{~` and `~}` delimiters. These expressions can access data, format values, render other templates, and perform logic.
 
+A second, complementary form - the "inline template" - is delimited with `{<` and `>}`. It captures its contents verbatim and re-parses them as a template at runtime. See [Inline Template](#inline-template) below.
+
 ## Data and Template Representation
 
 ### Data
@@ -185,6 +187,78 @@ Select a template based on a key from a map:
 {~TFM:AppData.Status:StatusTemplates~}
 ```
 
+### Addressed Template
+
+Render a template whose body is stored at a data address. The body is looked up at runtime and parsed against the current `Record` / `Context` / `Scope` / `State`, so any expressions inside it resolve in the surrounding scope.
+
+Delimiters: `{[` to open, `]}` to close.
+
+```javascript
+// _Pict.AppData.MyTemplate = "TEMPLATED CONTENT HERE, {~D:AppData.SomeValue~}."
+// _Pict.AppData.SomeValue = "CHOCOLATE"
+{[AppData.MyTemplate]}
+// -> "TEMPLATED CONTENT HERE, CHOCOLATE."
+```
+
+The address resolves through the standard roots - `AppData.X`, `Bundle.X`, `Record.X`, `Context[0].X`, `Scope.X`, `TempData.X`, etc. Array indexing works (`{[AppData.Templates[1]]}`), and the resolved body can itself contain any other pict expressions (including nested `{[...]}`, `{~T:~}`, `{~TS:~}`, `{~D:~}`, ...).
+
+This pairs with the inline template `{<...>}`:
+
+|                 | Where the body lives                                            |
+|-----------------|-----------------------------------------------------------------|
+| `{<body>}`      | Inline in the outer template, captured verbatim and re-parsed. |
+| `{[Address]}`   | At a data address; looked up at runtime and parsed.             |
+| `{~T:Hash~}`    | Registered in `pict.TemplateProvider` under a hash.             |
+
+If the address does not resolve, or resolves to a non-string, the engine logs a warning that names the address and the full expression, and renders an empty string:
+
+```
+Pict: Addressed Template Render: Address [AppData.Missing.Path] did not resolve for expression [{[AppData.Missing.Path]}]
+```
+
+An address that resolves to an empty string renders empty silently (no warning) - empty bodies are a valid degenerate case, not a missing data condition.
+
+### Inline Template
+
+Define a template literal at the point of use - no need to register it with `pict.TemplateProvider.addTemplate()` first. The body between `{<` and `>}` is captured verbatim during the outer parse, then re-parsed as a template when this expression renders. The surrounding `Record`, `Context`, `Scope`, and `State` are passed through unchanged, so nested expressions resolve against the same scope they would at the outer level.
+
+Delimiters: `{<` to open, `>}` to close.
+
+```javascript
+{<TEMPLATED CONTENT HERE, {~D:AppData.SomeValue~}.>}
+```
+
+If `AppData.SomeValue` is `"CHOCOLATE"`, this renders as `TEMPLATED CONTENT HERE, CHOCOLATE.`
+
+Any other jellyfish expression can nest inside it - the body is just a template string. Examples:
+
+```javascript
+// Data + literal text
+{<Hello, {~D:AppData.User.Name~}.  You are {~D:AppData.User.Age~} years old.>}
+
+// HTML in the body, with iteration
+{<<ul>{~TS:Cereal-Row:AppData.Cereals~}</ul>>}
+
+// Inside a {~TS:~} row -- per-row Record is available
+{~TS:Row-Template:AppData.Cereals~}
+// ...where Row-Template = '<li>{<{~D:Record.Name~} #{~D:Record.Year~}>}</li>'
+
+// With a formatting filter
+{<Total: {~Dollars:AppData.Invoice.Amount~}>}
+
+// With a registered child template
+{<Section: {~T:GreetingChild:AppData.Guest~} -- end.>}
+```
+
+**When to reach for it** - prefer the inline form when:
+- You want a one-shot template literal that would clutter `Templates: [...]` for a single use.
+- You need to compose a small chunk of template syntax inline in a JS string (utilities, tests, or string-builder helpers).
+- You're stitching together fragments and want the surrounding scope preserved without manually threading `Record` / `Context` through.
+
+For repeated content, register a named template with `pict.TemplateProvider.addTemplate()` and use `{~T:...~}` instead - named templates are easier to discover, cache better, and surface in template auditing.
+
+Direct nesting of `{<...>}` inside `{<...>}` is not supported (the first `>}` closes the outer block); wrap the inner literal in a registered template hash and reference it with `{~T:Hash~}` if you need that.
+
 ## Other Templates Multiplied by a Data Set
 
 ### Template Set
@@ -227,6 +301,41 @@ Render a template for each value in an object:
 ```javascript
 {~TemplateValueSet:PropertyRow:AppData.Settings~}
 {~TVS:PropertyRow:AppData.Settings~}
+```
+
+## Functions
+
+### Function
+
+Call a function resolved from an address, passing values resolved from other addresses as its arguments. The first `:`-separated parameter is the function's address; each subsequent parameter is an address whose resolved value becomes an argument. Arity is dynamic.
+
+```javascript
+{~Function:Pict.providers.Geometry.area:Record.X:Record.Y~}
+{~F:Pict.providers.Geometry.area:Record.X:Record.Y~}
+```
+
+If `Pict.providers.Geometry.area` is `(pW, pH) => pW * pH` and the record is `{ X: 6, Y: 7 }`, this renders `42`.
+
+The function is invoked with `this` bound to its owner object (everything before the final `.` in the address), so instance methods that rely on `this` work naturally:
+
+```javascript
+testPict.services.Counter = {
+    base: 1000,
+    offsetBy: function (pDelta) { return this.base + pDelta; }
+};
+// {~F:Pict.services.Counter.offsetBy:Record.Delta~}   ->   1023  (for Delta=23)
+```
+
+Arguments resolve from any of the standard address roots - `Record.X`, `AppData.X.Y`, `Scope.X`, `Context[0].X`, `Bundle.X`, etc.  Zero arguments is fine:
+
+```javascript
+{~F:Pict.services.Time.now~}
+```
+
+If the address does not resolve to a function (missing, or resolves to a non-function value), the engine logs a warning naming the address and the full template expression, and renders an empty string. The same handling applies if the function throws.
+
+```
+Pict: Function Render: Function not found at address [Pict.services.Nope.notThere] for template [{~Function:Pict.services.Nope.notThere:Record.X~}]
 ```
 
 ## Logic
@@ -385,6 +494,9 @@ Log an entire object tree:
 | `Template` | `T` | Render template by hash |
 | `TemplateByReference` | `TBR` | Render template with data from address |
 | `TemplateByDataAddress` | `TBDA` | Render template whose hash is in data |
+| (inline body) | `{<...>}` | Inline template literal - body is parsed as a template at runtime |
+| (addressed body) | `{[...]}` | Resolve an address to a template string and render it |
+| `Function` | `F` | Call a resolved function with addressed arguments |
 | `TemplateFromMap` | `TFM` | Select template by key from map |
 | `TemplateFromAddress` | `TFA` | Render template from address |
 | `TemplateByType` | `TBT` | Render template by type |
