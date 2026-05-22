@@ -1178,6 +1178,96 @@ class PictMeadowEntityProvider extends libFableServiceBase
 	}
 
 	/**
+	 * For a given list of objects, cache connected entity records (use lazy loading of pages and not count requests).
+	 *
+	 * @param {Array} pRecordSet - An array of objects to check cache on joined records for, and, get/cache the records as needed.
+	 * @param {Array} pIDListToCache - An array of property strings that are the ID fields to cache connected records for.
+	 * @param {Array} pEntityListToCache - An array of entity names, which can override the speculative entity name derived from the ID field name.
+	 * @param {boolean} pLiteRecords - If true, only cache lite records (ID and Name fields).
+	 *
+	 * @return {void}
+	 */
+	cacheConnectedEntityRecordsWithoutCount(pRecordSet, pIDListToCache, pEntityListToCache, pLiteRecords, fCallback)
+	{
+		//FIXME: pLiteRecords is ignored?
+		if (!Array.isArray(pRecordSet) || pRecordSet.length < 1)
+		{
+			return fCallback();
+		}
+
+		if (!Array.isArray(pIDListToCache) || pIDListToCache.length < 1)
+		{
+			return fCallback();
+		};
+
+		const tmpAnticipate = this.fable.newAnticipate();
+
+		const tmpEntityListToCache = pEntityListToCache || [];
+		tmpAnticipate.maxOperations = 10;
+		for (let i = 0; i < pIDListToCache.length; i++)
+		{
+			const tmpEntityIDSourceField = pIDListToCache[i];
+			// If an entity name override is provided, use it, otherwise speculate the joined entity name ID field from the source ID field name.
+			const tmpEntityName = tmpEntityListToCache[i] || tmpEntityIDSourceField.replace(/^ID/, '');
+			const tmpIDField = `ID${tmpEntityName}`;
+
+			// Make a set of IDs to fetch for this entity.
+			const tmpEntityIDsToFetch = new Set();
+
+			// Initialize the cache
+			this.initializeCache(tmpEntityName);
+
+			// First pass: gather IDs to fetch
+			for (const tmpRecord of pRecordSet)
+			{
+				const tmpIDValue = tmpRecord[tmpEntityIDSourceField];
+				if (tmpIDValue)
+				{
+					const tmpCachedRecord = this.recordCache[tmpEntityName].read(tmpIDValue);
+					if (!tmpCachedRecord)
+					{
+						tmpEntityIDsToFetch.add(tmpIDValue);
+					}
+				}
+			}
+
+			// Now if there are records to fetch, do the request.
+			if (tmpEntityIDsToFetch.size > 0)
+			{
+				tmpAnticipate.anticipate(
+					function (fRequestComplete)
+					{
+						const tmpIDRecordsArray = Array.from(tmpEntityIDsToFetch);
+						const tmpMeadowFilterExpression = `FBL~ID${tmpEntityName}~INN~${tmpIDRecordsArray.join(',')}`;
+
+						this.getEntitySet(tmpEntityName, tmpMeadowFilterExpression,
+							(pError, pEntitySet) =>
+							{
+								if (pError)
+								{
+									this.log.error(`cacheConnectedEntityRecords error getting connected entity records for [${tmpEntityName}] with IDs [${tmpIDRecordsArray.join(',')}]: ${pError}`, { Stack: pError.stack });
+									return fRequestComplete(pError);
+								}
+								// The method automagically cached them for us!  Just move on to the next...
+								return fRequestComplete();
+							}, null, { NoCount: true });
+					}.bind(this));
+			}
+		}
+
+		tmpAnticipate.wait(
+			(pError) =>
+			{
+				if (pError)
+				{
+					this.log.error(`cacheConnectedEntityRecords error gathering connected entity records: ${pError}`, { Stack: pError.stack });
+					return fCallback(pError);
+				}
+				return fCallback();
+			});
+	}
+
+	/**
 	 * For a given list of objects, cache connected entity records.
 	 *
 	 * @param {Array} pRecordSet - An array of objects to check cache on joined records for, and, get/cache the records as needed.
@@ -1478,6 +1568,42 @@ class PictMeadowEntityProvider extends libFableServiceBase
 				if (tmpPossibleRecords)
 				{
 					return fCallback(null, tmpPossibleRecords);
+				}
+				if (pOptions.NoCount)
+				{
+					// Lazily load until we hit a not full page rather than using couns.
+					// Does not respect parallelization.
+					const pageSize = 250;
+					let page = 0;
+					let returnSet = [];
+					const tmpFilterStanza = pMeadowFilterExpression ? `/FilteredTo/${pMeadowFilterExpression}` : '';
+					const recursiveCallback = (pDownloadError, pDownloadResponse, pDownloadBody) => 
+					{
+						if ((pDownloadResponse && pDownloadResponse.statusCode && pDownloadResponse.statusCode >= 400) || !Array.isArray(pDownloadBody))
+						{
+							this.log.error(`Error getting entity set of [${pEntity}] filtered to [${pMeadowFilterExpression}]: ${pDownloadResponse.statusCode} ${pDownloadResponse.statusMessage}`);
+							return fCallback(new Error(`Error getting entity set of [${pEntity}] filtered to [${pMeadowFilterExpression}]: ${pDownloadResponse.statusCode} ${JSON.stringify(pDownloadBody || {})}`), []);
+						}
+
+						if (pDownloadBody?.length < pageSize)
+						{
+							returnSet = returnSet.concat(pDownloadBody);
+
+							if (returnSet)
+							{
+								this.recordSetCache[pEntity].put(returnSet, pMeadowFilterExpression);
+							}
+
+							this.cacheIndividualEntityRecords(pEntity, returnSet);
+							fCallback(null, returnSet);
+						}
+						else
+						{
+							page += 1;
+							this.restClient.getJSON(`${this.options.urlPrefix}${pEntity}s${tmpFilterStanza}/${page * pageSize}/${pageSize}` + (postfix || ''), recursiveCallback);
+						}
+					};
+					return this.restClient.getJSON(`${this.options.urlPrefix}${pEntity}s${tmpFilterStanza}/${page * pageSize}/${pageSize}` + (postfix || ''), recursiveCallback);
 				}
 				return this.getEntitySetRecordCount(pEntity, pMeadowFilterExpression,
 					(pRecordCountError, pRecordCount) =>

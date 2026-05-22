@@ -181,6 +181,17 @@ declare class PictMeadowEntityProvider {
      */
     getEntity(pEntity: string, pIDRecord: string | number, fCallback: (pError?: Error, pRecord?: any) => void): void;
     /**
+     * For a given list of objects, cache connected entity records (use lazy loading of pages and not count requests).
+     *
+     * @param {Array} pRecordSet - An array of objects to check cache on joined records for, and, get/cache the records as needed.
+     * @param {Array} pIDListToCache - An array of property strings that are the ID fields to cache connected records for.
+     * @param {Array} pEntityListToCache - An array of entity names, which can override the speculative entity name derived from the ID field name.
+     * @param {boolean} pLiteRecords - If true, only cache lite records (ID and Name fields).
+     *
+     * @return {void}
+     */
+    cacheConnectedEntityRecordsWithoutCount(pRecordSet: any[], pIDListToCache: any[], pEntityListToCache: any[], pLiteRecords: boolean, fCallback: any): void;
+    /**
      * For a given list of objects, cache connected entity records.
      *
      * @param {Array} pRecordSet - An array of objects to check cache on joined records for, and, get/cache the records as needed.

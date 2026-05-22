@@ -81,6 +81,17 @@ declare class Pict extends Pict_base {
     };
     views: any;
     /**
+     * Convenience accessor for the built-in icon registry — equivalent to
+     * `pict.providers.Icon.get(name, opts)`.  Always returns a string
+     * (never throws, never undefined); a missing icon emits a visible
+     * question-mark glyph so the gap is obvious in the UI.
+     *
+     * @param {string} pName     PascalCase icon name, or an alias.
+     * @param {object} [pOpts]   { variant, size, class, ariaLabel }
+     * @returns {string}
+     */
+    icon(pName: string, pOpts?: object): string;
+    /**
      * Load manifests in as Hashed services
      *
      * @param {Object<String, String>} pManifestSet - The manifest set to load.
