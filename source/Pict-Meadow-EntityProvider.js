@@ -1585,14 +1585,11 @@ class PictMeadowEntityProvider extends libFableServiceBase
 							return fCallback(new Error(`Error getting entity set of [${pEntity}] filtered to [${pMeadowFilterExpression}]: ${pDownloadResponse.statusCode} ${JSON.stringify(pDownloadBody || {})}`), []);
 						}
 
+						returnSet = returnSet.concat(pDownloadBody);
+
 						if (pDownloadBody?.length < pageSize)
 						{
-							returnSet = returnSet.concat(pDownloadBody);
-
-							if (returnSet)
-							{
-								this.recordSetCache[pEntity].put(returnSet, pMeadowFilterExpression);
-							}
+							this.recordSetCache[pEntity].put(returnSet, pMeadowFilterExpression);
 
 							this.cacheIndividualEntityRecords(pEntity, returnSet);
 							fCallback(null, returnSet);
