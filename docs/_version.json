@@ -1,7 +1,7 @@
 {
 	"Name": "pict",
-	"Version": "1.0.368",
+	"Version": "1.0.370",
 	"Description": "Pict browser library.",
-	"GeneratedAt": "2026-05-18T22:45:13.383Z",
-	"GitCommit": "2838a58"
+	"GeneratedAt": "2026-05-22T05:42:33.666Z",
+	"GitCommit": "73c210b"
 }
