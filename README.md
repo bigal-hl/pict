@@ -1,5 +1,7 @@
 # Pict
 
+> **[&#9654; Read the Pict Documentation](https://stevenvelozo.github.io/pict/)** &mdash; interactive docs with the full API reference.
+
 Pict is a non-opinionated set of tools to provide the disparate parts of Model, View and Controller patterns to web, console and other applications where the UI is primarily represented as text strings.
 
 
