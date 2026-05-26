@@ -7,7 +7,7 @@
     "steven velozo <steven@velozo.com>"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/stevenvelozo/pict",
+  "homepage": "https://github.com/fable-retold/pict",
   "moduleType": [
     "globals",
     "node"

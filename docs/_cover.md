@@ -8,4 +8,4 @@
 - Seamless integration with Fable service architecture
 
 [Get Started](README.md)
-[GitHub](https://github.com/stevenvelozo/pict)
+[GitHub](https://github.com/fable-retold/pict)

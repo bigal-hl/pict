@@ -1,6 +1,6 @@
 # Pict
 
-> **[&#9654; Read the Pict Documentation](https://stevenvelozo.github.io/pict/)** &mdash; interactive docs with the full API reference.
+> **[&#9654; Read the Pict Documentation](https://fable-retold.github.io/pict/)** &mdash; interactive docs with the full API reference.
 
 Pict is a non-opinionated set of tools to provide the disparate parts of Model, View and Controller patterns to web, console and other applications where the UI is primarily represented as text strings.
 
@@ -110,7 +110,7 @@ luxury code docker image provides this for free, or you can use the scripts in t
 want to run the harness from.
 
 ```shell
-git clone https://github.com/stevenvelozo/retold-harness
+git clone https://github.com/fable-retold/retold-harness
 cd retold-harness
 npm install
 npm run docker-dev-build
@@ -174,11 +174,11 @@ npm run build-compatible
 
 ## Related Packages
 
-- [pict-view](https://github.com/stevenvelozo/pict-view) - View base class
-- [pict-template](https://github.com/stevenvelozo/pict-template) - Template engine
-- [pict-provider](https://github.com/stevenvelozo/pict-provider) - Data provider base class
-- [pict-application](https://github.com/stevenvelozo/pict-application) - Application lifecycle wrapper
-- [fable](https://github.com/stevenvelozo/fable) - Application services framework
+- [pict-view](https://github.com/fable-retold/pict-view) - View base class
+- [pict-template](https://github.com/fable-retold/pict-template) - Template engine
+- [pict-provider](https://github.com/fable-retold/pict-provider) - Data provider base class
+- [pict-application](https://github.com/fable-retold/pict-application) - Application lifecycle wrapper
+- [fable](https://github.com/fable-retold/fable) - Application services framework
 
 ## License
 

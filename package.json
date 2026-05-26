@@ -47,9 +47,9 @@
   "author": "steven velozo <steven@velozo.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/stevenvelozo/pict/issues"
+    "url": "https://github.com/fable-retold/pict/issues"
   },
-  "homepage": "https://github.com/stevenvelozo/pict#readme",
+  "homepage": "https://github.com/fable-retold/pict#readme",
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/jquery": "^3.5.33",

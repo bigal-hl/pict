@@ -99,7 +99,7 @@ different location and alter the html reference.
 ### Step 1: Check Out the pict Repository
 
 ```shell
-git clone https://github.com/stevenvelozo/pict
+git clone https://github.com/fable-retold/pict
 ```
 
 ### Step 2: Navigate to the 
