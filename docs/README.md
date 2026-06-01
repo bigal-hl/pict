@@ -63,7 +63,7 @@ Templates use Pict's template syntax to generate dynamic content from data, supp
 
 ## Related Packages
 
-- [pict-view](https://github.com/fable-retold/pict-view) - View base class
-- [pict-application](https://github.com/fable-retold/pict-application) - Application base class
-- [pict-provider](https://github.com/fable-retold/pict-provider) - Provider base class
-- [fable](https://github.com/fable-retold/fable) - Service provider framework
+- [pict-view](https://fable-retold.github.io/pict-view/) - View base class
+- [pict-application](https://fable-retold.github.io/pict-application/) - Application base class
+- [pict-provider](https://fable-retold.github.io/pict-provider/) - Provider base class
+- [fable](https://fable-retold.github.io/fable/) - Service provider framework
