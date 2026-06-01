@@ -1,5 +1,5 @@
 {
-	"Generated": "2026-05-26T21:12:44.549Z",
+	"Generated": "2026-06-01T03:45:32.010Z",
 	"Mode": "module",
 	"GitHubOrg": "fable-retold",
 	"DefaultBranch": "master",
@@ -142,6 +142,7 @@
 			"_version.json",
 			"application_lifecycle/README.md",
 			"applications/README.md",
+			"dependencies/pict.min.js",
 			"design_philosophy/applications_providers_views_and_solvers.md",
 			"design_philosophy/config.json",
 			"design_philosophy/model_view_controller_ohmy.md",
