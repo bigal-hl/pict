@@ -79,7 +79,7 @@ const result = _Pict.parseTemplateByHash('Greeting');
 ### Try it in the playground
 
 The block below runs against a fresh `pict` instance and writes the rendered
-HTML straight into the playground's DOM sandbox. Click ▶ to render
+HTML straight into the playground's DOM sandbox. Click play to render
 **Hello, World!** into the right-hand pane.
 
 ```javascript
@@ -95,8 +95,8 @@ sandbox.innerHTML = html;
 console.log('Rendered HTML:', html);
 ```
 
-And here's the same pattern using `ContentAssignment` — pict's canonical
-DOM-write API — to place the rendered fragment into a target you create
+And here's the same pattern using `ContentAssignment` - pict's canonical
+DOM-write API - to place the rendered fragment into a target you create
 inside the sandbox:
 
 ```javascript
@@ -107,7 +107,7 @@ const pict = new libPict({ Product: 'ContentAssignmentDemo' });
 sandbox.innerHTML = '<div id="DemoTarget" style="border:1px dashed #aaa; padding:8px;"></div>';
 
 pict.TemplateProvider.addTemplate('Status',
-    '<p style="margin:0">{~D:Record.label~} — <strong>{~D:Record.value~}</strong></p>');
+    '<p style="margin:0">{~D:Record.label~} - <strong>{~D:Record.value~}</strong></p>');
 
 const html = pict.parseTemplateByHash('Status', { label: 'Build', value: 'green' });
 pict.ContentAssignment.assignContent('#DemoTarget', html);

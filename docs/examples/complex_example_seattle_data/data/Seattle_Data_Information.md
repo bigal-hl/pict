@@ -2,7 +2,7 @@
 
 To generate a more meaningful example, public data was downloaded from the US
 Federal Data Catalog [https://catalog.data.gov/] to explore and intersect,
-leveraging the various fable and pict capabilities.
+using the various fable and pict capabilities.
 
 Each capability is exercised separately to demonstrate isolated features
 that can be composed in different ways.

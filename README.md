@@ -1,6 +1,6 @@
 # Pict
 
-> **[&#9654; Read the Pict Documentation](https://fable-retold.github.io/pict/)** &mdash; interactive docs with the full API reference.
+> **[Read the Pict Documentation](https://fable-retold.github.io/pict/)** - interactive docs with the full API reference.
 
 Pict is a non-opinionated set of tools to provide the disparate parts of Model, View and Controller patterns to web, console and other applications where the UI is primarily represented as text strings.
 
@@ -157,7 +157,7 @@ If your luxury code docker container restarts, the tmux will no longer be runnin
 ### Running the Unit Tests
 
 You can either execute the unit tests through the visual studio code test running
-interface via the browser (allowing you to leverage breakpoints for each test)
+interface via the browser (allowing you to use breakpoints for each test)
 or within the Docker terminal by running (from the pict folder):
 
 `npm test`

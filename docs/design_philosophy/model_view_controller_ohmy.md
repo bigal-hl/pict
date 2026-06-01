@@ -58,6 +58,6 @@ Best practice has the model being plain old JSON objects, preferably without loo
 
 In the case of most applications, the `pict-application` acts as the higher level application controller.  As a developer, you can balance complexity between all three of applications, providers and views though.  Simple controller functions within a view make a lot of sense sometimes, to keep down complexity.
 
-Because of the ubiquitous leveraging of templates and a consistent address space for the model, often times behavior management happens within the templates themselves.
+Because of the ubiquitous using of templates and a consistent address space for the model, often times behavior management happens within the templates themselves.
 
 It's possible to make a do what you want work with quick and dirty code, all in one place, and slowly refactor out complexity if necessary without rewriting the whole application.  This is by design!

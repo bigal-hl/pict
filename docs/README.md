@@ -11,7 +11,7 @@ Pict is a non-opinionated suite of tools implementing Model, View, and Controlle
 - **MetaTemplate System** - Powerful templating with data interpolation and iteration
 - **State Management** - Centralized AppData store with two-way data binding
 - **Provider Architecture** - Extensible service providers for data and functionality
-- **Browser & Node.js** - Works seamlessly in both environments
+- **Browser & Node.js** - Works smoothly in both environments
 
 ## Quick Start
 
