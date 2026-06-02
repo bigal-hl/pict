@@ -207,15 +207,8 @@ Marshaling is typically triggered by:
 
 Components move through the lifecycle in this order:
 
-```mermaid
-graph TD
-    A["Instantiation"] --> B["Construction"]
-    B --> C["Initialization"]
-    C --> D["Solving"]
-    D --> E["Rendering"]
-    E --> F["Marshaling"]
-    F -->|"on user action"| D
-```
+<!-- bespoke diagram: edit diagrams/the-complete-cycle.mmd or .hints.json, then: npx pict-renderer-graph build modules/pict/pict/docs/design_philosophy -->
+![The Complete Cycle](diagrams/the-complete-cycle.svg)
 
 ## Coupling State with Lifecycle
 

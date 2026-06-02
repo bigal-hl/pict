@@ -1,0 +1,11 @@
+graph TD
+    A["Construction<br/><i>Application object created, views/providers added</i>"] --> B["Initialization<br/><i>initialize() called</i>"]
+    B --> C["onBeforeInit<br/><i>Pre-initialization hook</i>"]
+    C --> D["onInitialize<br/><i>Synchronous initialization</i>"]
+    D --> E["onInitializeAsync<br/><i>Async initialization (data loading)</i>"]
+    E --> F["Provider Init<br/><i>All providers initialize</i>"]
+    F --> G["View Init<br/><i>All views initialize</i>"]
+    G --> H["Initial Solve<br/><i>Views perform initial calculations</i>"]
+    H --> I["Initial Render<br/><i>Main viewport view renders (if AutoRender)</i>"]
+    I --> J["onAfterInit<br/><i>Post-initialization hook</i>"]
+    J --> K["Running<br/><i>Application is active</i>"]

@@ -1,0 +1,7 @@
+graph TD
+    A["Instantiation"] --> B["Construction"]
+    B --> C["Initialization"]
+    C --> D["Solving"]
+    D --> E["Rendering"]
+    E --> F["Marshaling"]
+    F -->|"on user action"| D

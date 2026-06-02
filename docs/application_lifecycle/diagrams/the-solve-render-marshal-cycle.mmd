@@ -1,0 +1,4 @@
+graph TD
+    S["Solve<br/><i>Calculate values from state</i>"] --> R["Render<br/><i>Generate output from templates</i>"]
+    R --> M["Marshal<br/><i>Collect user input back to state</i>"]
+    M -->|"state change"| S

@@ -4,19 +4,8 @@ The pict application lifecycle defines the ordered sequence of events from appli
 
 ## Lifecycle Overview
 
-```mermaid
-graph TD
-    A["Construction<br/><i>Application object created, views/providers added</i>"] --> B["Initialization<br/><i>initialize() called</i>"]
-    B --> C["onBeforeInit<br/><i>Pre-initialization hook</i>"]
-    C --> D["onInitialize<br/><i>Synchronous initialization</i>"]
-    D --> E["onInitializeAsync<br/><i>Async initialization (data loading)</i>"]
-    E --> F["Provider Init<br/><i>All providers initialize</i>"]
-    F --> G["View Init<br/><i>All views initialize</i>"]
-    G --> H["Initial Solve<br/><i>Views perform initial calculations</i>"]
-    H --> I["Initial Render<br/><i>Main viewport view renders (if AutoRender)</i>"]
-    I --> J["onAfterInit<br/><i>Post-initialization hook</i>"]
-    J --> K["Running<br/><i>Application is active</i>"]
-```
+<!-- bespoke diagram: edit diagrams/lifecycle-overview.mmd or .hints.json, then: npx pict-renderer-graph build modules/pict/pict/docs/application_lifecycle -->
+![Lifecycle Overview](diagrams/lifecycle-overview.svg)
 
 ## Detailed Lifecycle Phases
 
@@ -230,12 +219,8 @@ The application is now running and ready for user interaction.
 
 During the running state, views operate in a solve-render-marshal cycle:
 
-```mermaid
-graph TD
-    S["Solve<br/><i>Calculate values from state</i>"] --> R["Render<br/><i>Generate output from templates</i>"]
-    R --> M["Marshal<br/><i>Collect user input back to state</i>"]
-    M -->|"state change"| S
-```
+<!-- bespoke diagram: edit diagrams/the-solve-render-marshal-cycle.mmd or .hints.json, then: npx pict-renderer-graph build modules/pict/pict/docs/application_lifecycle -->
+![The Solve-Render-Marshal Cycle](diagrams/the-solve-render-marshal-cycle.svg)
 
 ### Solve Phase
 
