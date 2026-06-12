@@ -45,6 +45,7 @@
  * @typedef { 'None' |
  * 'Match' | 'StringMatch' | 'DateMatch' | 'NumericMatch' |
  * 'Range' | 'StringRange' | 'DateRange' | 'NumericRange' |
+ * 'DistinctSelectedValueList' |
  * 'InternalJoinMatch' | 'InternalJoinStringMatch' | 'InternalJoinNumericMatch' | 'InternalJoinDateMatch' |
  * 'InternalJoinRange' | 'InternalJoinStringRange' | 'InternalJoinNumericRange' | 'InternalJoinDateRange'  | 'InternalJoinSelectedValue' | 'InternalJoinSelectedValueList' |
  * 'ExternalJoinMatch' | 'ExternalJoinStringMatch' | 'ExternalJoinNumericMatch' | 'ExternalJoinDateMatch' |
@@ -409,6 +410,44 @@ class FilterMeadowStanzaTokenGenerator
 								tmpFilter.Value = `%25${tmpValue}%25`; //FIXME: figure out a cleaner way to do URL encoding for these - probably, should be downstream, but isn't currently
 							}
 							tmpFilterResult.Filters.push(tmpFilter);
+						}
+					}
+					break;
+				case 'DistinctSelectedValueList':
+					/*
+					  "Values": [ "1/4\" Chip", "MFG'D Sand" ],
+					  "FilterByColumn": "Product",
+
+					  Equality against selected distinct values of a column on the CORE
+					  entity (no join) — an OR-chain of EQ stanzas the per-group serializer
+					  wraps in ONE paren group. NOT FBL~INN: the server parser comma-splits
+					  FBL list values, which corrupts string values containing commas.
+					 */
+					for (const tmpField of tmpFilterConfig.FilterByColumns || (tmpFilterConfig.FilterByColumn ? [ tmpFilterConfig.FilterByColumn ] : [ 'Name' ]))
+					{
+						for (const tmpValue of tmpValuesArray)
+						{
+							if (tmpValue == null)
+							{
+								continue;
+							}
+							// The server tokenizes the (URI-decoded) filter string on '~', so a
+							// value containing a literal '~' is unrepresentable in the syntax.
+							if (typeof tmpValue === 'string' && tmpValue.indexOf('~') >= 0)
+							{
+								this.log.warn(`DistinctSelectedValueList value contains '~' (unrepresentable in the meadow filter syntax); skipping value.`, { Field: tmpField, Value: tmpValue });
+								continue;
+							}
+							tmpFilterResult.Filters.push(
+							{
+								Index: 0,
+								CoreEntity: true,
+								Entity: pFilterState.Entity,
+								Instruction: 'FBVOR',
+								Field: tmpField,
+								Operator: 'EQ',
+								Value: encodeURIComponent(tmpValue),
+							});
 						}
 					}
 					break;
