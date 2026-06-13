@@ -29,6 +29,14 @@ class PictCSS extends libFableServiceBase
 
 		this.inlineCSSMap = {};
 
+		// Dirty flag for injectCSS(): only rewrite the <style> element when a
+		// fragment was actually added/removed/changed. Views call injectCSS() on
+		// every render, and the DOM write (innerHTML of the full concatenated CSS)
+		// forces the browser to reparse the whole stylesheet and repaint -- doing
+		// that on every navigation paints a brief unstyled flash. Start dirty so
+		// the first injectCSS() always writes.
+		this._cssDirty = true;
+
 		this.fable.addSolverFunction(this.fable.expressionParser, 'createcsscolorrgbfromnumeric', this.createCssColorRGBFromNumeric.bind(this), 'Create a CSS color from RGB components');
 	}
 
@@ -38,11 +46,22 @@ class PictCSS extends libFableServiceBase
 	{
 		let tmpPriority = (typeof(pPriority) !== 'undefined') ? pPriority : 1000;
 		let tmpProvidor = (typeof(pProvider) === 'string') ? pProvider : 'Unknown';
+		// Only mark dirty when the fragment is new or its content/priority actually
+		// changed, so a view re-registering identical CSS does not force a rewrite.
+		let tmpExisting = this.inlineCSSMap[pHash];
+		if (!tmpExisting || tmpExisting.Content !== pContent || tmpExisting.Priority !== tmpPriority)
+		{
+			this._cssDirty = true;
+		}
 		this.inlineCSSMap[pHash] = { Hash: pHash, Content: pContent, Provider: tmpProvidor, Priority:tmpPriority };
 	}
 
 	removeCSS(pHash)
 	{
+		if (this.inlineCSSMap[pHash])
+		{
+			this._cssDirty = true;
+		}
 		delete this.inlineCSSMap[pHash];
 	}
 
@@ -108,9 +127,19 @@ class PictCSS extends libFableServiceBase
 		return tmpCSS;
 	}
 
-	// Inject the CSS into the magic DOM element for it
-	injectCSS()
+	// Inject the CSS into the magic DOM element for it.
+	// Skips the DOM write when nothing has changed since the last injection (see
+	// the _cssDirty notes in the constructor) -- this is what keeps per-render
+	// injectCSS() calls from reparsing the whole stylesheet and flickering on
+	// navigation. Pass pForceInjection = true to write unconditionally, e.g. if a
+	// caller mutated inlineCSSMap directly instead of using addCSS()/removeCSS().
+	injectCSS(pForceInjection)
 	{
+		if (!pForceInjection && !this._cssDirty)
+		{
+			return;
+		}
+		this._cssDirty = false;
 		this.services.ContentAssignment.assignContent(this.options.CSSElementAddress, this.generateCSS());
 	}
 }

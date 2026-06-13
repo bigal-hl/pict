@@ -75,5 +75,67 @@ suite(
 				);
 			}
 		);
+
+		suite(
+			'injectCSS dirty-flag dedup',
+			() =>
+			{
+				test(
+					'injectCSS only writes to the DOM when the CSS actually changed',
+					(fDone) =>
+					{
+						let testPict = new libPict(_MockSettings);
+						testPict.CSSMap.inlineCSSMap = {};
+						// Spy on the DOM write.
+						let tmpWrites = 0;
+						testPict.CSSMap.services.ContentAssignment.assignContent = () => { tmpWrites++; };
+
+						// Flush to a known-clean baseline, then count from zero.
+						testPict.CSSMap.injectCSS();
+						tmpWrites = 0;
+
+						// Nothing changed -> injectCSS is a no-op.
+						testPict.CSSMap.injectCSS();
+						testPict.CSSMap.injectCSS();
+						Expect(tmpWrites).to.equal(0, 'redundant injections should not write');
+
+						// A new fragment dirties -> exactly one write.
+						testPict.CSSMap.addCSS('A', 'a {}', 100, 'F');
+						testPict.CSSMap.injectCSS();
+						testPict.CSSMap.injectCSS();
+						Expect(tmpWrites).to.equal(1, 'a new fragment should trigger a single write');
+
+						// Re-adding identical content does not dirty.
+						testPict.CSSMap.addCSS('A', 'a {}', 100, 'F');
+						testPict.CSSMap.injectCSS();
+						Expect(tmpWrites).to.equal(1, 'identical re-add should not write');
+
+						// Changed content dirties.
+						testPict.CSSMap.addCSS('A', 'a { color: red; }', 100, 'F');
+						testPict.CSSMap.injectCSS();
+						Expect(tmpWrites).to.equal(2, 'changed content should write');
+
+						// Changed priority dirties.
+						testPict.CSSMap.addCSS('A', 'a { color: red; }', 200, 'F');
+						testPict.CSSMap.injectCSS();
+						Expect(tmpWrites).to.equal(3, 'changed priority should write');
+
+						// removeCSS dirties; removing a missing hash does not.
+						testPict.CSSMap.removeCSS('A');
+						testPict.CSSMap.injectCSS();
+						Expect(tmpWrites).to.equal(4, 'removal should write');
+						testPict.CSSMap.removeCSS('A');
+						testPict.CSSMap.injectCSS();
+						Expect(tmpWrites).to.equal(4, 'removing a missing hash should not write');
+
+						// Force writes even when clean.
+						testPict.CSSMap.injectCSS(true);
+						Expect(tmpWrites).to.equal(5, 'forced injection should write even when clean');
+
+						fDone();
+					}
+				);
+			}
+		);
 	}
 );
